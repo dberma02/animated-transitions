@@ -8,7 +8,7 @@ class Constants {
   float CHARTHEIGHT = height - OFFSET*2;
   float BARWIDTH;
   
-  float RAD = min(width, height) * 0.4; 
+  float RAD = min(width, height) * .8; 
   PVector CENT = new PVector(width/2, height/2);
   
   public void setBarWidth(float barWidth) {

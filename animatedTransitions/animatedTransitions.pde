@@ -6,6 +6,7 @@ Parser parser;
 ArrayList<CoreData> coreData;
 Constants consts;
 LineToBar l2b;
+BarToPie b2p;
 
 void setup() {
   size(1200,700);
@@ -22,7 +23,10 @@ void setup() {
   }
   
   l2b = new LineToBar(coreData, consts);
+  b2p = new BarToPie(coreData, consts);
   movingLine();
+  b2p.drawArcs();
+  b2p.drawWedges();
 
 }
 
@@ -42,16 +46,5 @@ void draw() {
  
  
  public void movingLine() {
-    PVector p1 = new PVector(100.0, 100.0);
-  PVector p2 = new PVector(500.0, 600.0);
-  PVector end;
-  for (float i = 1; i > 0; i = i - 0.000005) {
-    println(i);
-      end = PVector.lerp(p1, p2,i);
-      fill(0);
-      line(p1.x, p1.y, end.x, end.y); 
-          background(255);
 
-  }
- 
  }

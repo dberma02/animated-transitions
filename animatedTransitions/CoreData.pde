@@ -3,7 +3,8 @@
 class CoreData {
   String xValueRaw;
   float yValueRaw;
-  float theta;
+  float startTheta;
+  float endTheta;
   int scaledHeight;
   PVector barRef;
   
