@@ -5,10 +5,12 @@
  */
  
  class Parser {
+   Constants consts;
+   float maxValue;
    
-   public Parser() {
+   public Parser(Constants consts) {
+     this.consts = consts;
    }
-   
    
    public ArrayList parse(String file) {
      String[] lines = loadStrings(file);
@@ -17,13 +19,36 @@
      int numLines = lines.length-1;
      ArrayList<CoreData> coreInfo = new ArrayList<CoreData>();
      
+     maxValue = Integer.MIN_VALUE;
      for (int i = 1; i < numLines; i++) {
        String[] data = split(lines[i], ",");
        CoreData cd = new CoreData(data[0], float(data[1]));
+       
+       if (maxValue < float(data[1])) {
+         maxValue = float(data[1]);
+       }
+       
        coreInfo.add(cd);
      }
      
      return coreInfo;
+   }
    
+   public ArrayList populateCartesian(ArrayList<CoreData> coreData) {
+     int size = coreData.size();
+  
+     float barWidth = consts.CHARTWIDTH/(size * 2 + 1);
+     consts.setBarWidth(barWidth);
+     
+     int i = 0;
+     for (CoreData cd : coreData) {
+       float barX = consts.OFFSET + barWidth + barWidth*2*i;
+       float barY = consts.CHARTBOTTOM - (cd.yValueRaw * (consts.CHARTHEIGHT)/maxValue);
+       
+       cd.barRef = new PVector(barX, barY); 
+       i++;
+     }
+     
+     return coreData;
    }
  }
