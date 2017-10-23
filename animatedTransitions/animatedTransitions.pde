@@ -44,9 +44,11 @@ void setup() {
   l2b = new LineToBar(coreData, consts);
   b2p = new BarToPie(coreData, consts);
   
+  b2p.newCenter();
  // b2p.drawArcs();
-  //b2p.drawWedges();
+ // b2p.drawWedges();
   //b2p.drawTangents();
+  //b2p.drawPositionedLines();
 
 
   fill(0);
@@ -60,7 +62,6 @@ boolean transitionToBar = false;
 boolean transitionToLine = false;
 boolean transitionToPie = false;
 void draw() {
-  
   
   if (stage == LINE_GRAPH) {
     background(255);    
@@ -79,6 +80,58 @@ void draw() {
   }
   
   if (transitionToPie) {
+     if (stage == UNFILLING_BARS) {
+        if (unfillBars()) {
+          stage = CONSOLIDATE_BARS;
+          iteration = 51;
+        }
+        iteration--;
+     }
+     if (stage == CONSOLIDATE_BARS) {
+       background(255);
+       l2b.drawBarTops(iteration);
+       for (CoreData data : coreData) {
+         PVector topLeft = new PVector(data.barRef.x, data.barRef.y);
+         PVector topRight = new PVector(data.barRef.x + consts.BARWIDTH, data.barRef.y);
+         PVector bottomLeft = new PVector(data.barRef.x, 
+                                        consts.CHARTBOTTOM);
+         PVector bottomRight = new PVector(data.barRef.x + consts.BARWIDTH, 
+                                        consts.CHARTBOTTOM);   
+         PVector midTop = new PVector (data.barRef.x + consts.BARWIDTH/2, data.barRef.y);
+                                        
+         float lerpValue = 1- iteration *.02;                               
+         PVector left = PVector.lerp(topLeft, midTop, lerpValue);
+         PVector right = PVector.lerp(topRight, midTop, lerpValue);
+         
+         line(left.x, topLeft.y, left.x, bottomLeft.y);
+         line(right.x, topRight.y, right.x, bottomRight.y);
+       }
+       iteration--;
+       
+       if (iteration < 0) {
+         stage++;
+         iteration = 0;
+       }
+     }
+     if (stage == SCALE_LINES) {
+       
+       //start points are middle
+       background(255);
+       b2p.scaleLines(iteration);
+       iteration ++;
+       
+       if (iteration < 0) {
+         stage++;
+         iteration = 100;
+       }
+     }
+     
+    //hollow out bars
+    //bring lines together to create single vertical lines
+    //scale lines
+    //reposition lines to be tangent to "circle"
+    //curve arcs to make circle
+    //create slice lines
     goToPie();
   }
   
