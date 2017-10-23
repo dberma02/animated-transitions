@@ -62,6 +62,7 @@ class BarToPie {
    
    public boolean consolidateBars(int iteration) {
      float lerpValue = 1;
+
      for (CoreData data : coreData) {
        PVector topLeft = new PVector(data.barRef.x, data.barRef.y);
        PVector topRight = new PVector(data.barRef.x + consts.BARWIDTH, data.barRef.y);
@@ -71,15 +72,16 @@ class BarToPie {
                                         consts.CHARTBOTTOM);   
        PVector midTop = new PVector (data.barRef.x + consts.BARWIDTH/2, data.barRef.y);
                                         
-       lerpValue = 1- iteration *.02;                               
+       lerpValue = 1 - iteration *.02;                               
        PVector left = PVector.lerp(topLeft, midTop, lerpValue);
        PVector right = PVector.lerp(topRight, midTop, lerpValue);
          
        line(left.x, topLeft.y, left.x, bottomLeft.y);
        line(right.x, topRight.y, right.x, bottomRight.y);
      }
-     
-     if (lerpValue <= 0) {
+          println("lerpValue: " + lerpValue);
+     if (lerpValue > 1) {
+       println("returning true");
        return true;
      }
      
@@ -99,7 +101,6 @@ class BarToPie {
        PVector lpos = PVector.lerp(uPoint, cp.scaledLineRef, lerpValue);
 
        line(bottom.x, bottom.y, lpos.x, lpos.y);
-       println("lerp: " + lerpValue);
        
        fill(255);
      }
@@ -127,7 +128,7 @@ class BarToPie {
        PVector beginTop = new PVector(cd.barRef.x + consts.BARWIDTH/2, cd.scaledLineRef.y);
        PVector beginBottom = new PVector(cd.barRef.x + consts.BARWIDTH/2, consts.CHARTBOTTOM);
          
-       lerpValue = iteration*.007;
+       lerpValue = iteration*.009;
        PVector top = PVector.lerp(beginTop, endPointN, lerpValue);        
        PVector bottom = PVector.lerp(beginBottom, endPointP, lerpValue);
        
