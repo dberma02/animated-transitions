@@ -34,52 +34,66 @@ class BarToPie {
    
    
    public void newCenter() {
+      //center of actual circle
       PVector c = new PVector(.5* width, .5* height);
-      float midTheta = 1.75*PI;
+      //radius of actual circle
       float r1 = 50;
-      PVector mid = getPoint(midTheta, consts.CENT, r1);
-      float sclr = 2;
-      stroke(0);
-      //circle1
-      arc(c.x,c.y, 2*r1, 2*r1, 0,2*PI);
+      //value for which circle will be scaled up by to get big outer circle
+      float sclr = 100;
       
-      //midpoint
-      fill(#ff0000);
-      ellipse(mid.x, mid.y, 10, 10);
-      fill(0);
-      ellipse(c.x,c.y, 10,10);
-      noFill();
-      println("MID: ", mid);
-
+   //   for(CoreData cd in coreData) {
       
-      //angle
-       stroke(#ff0000);
-      arc(c.x, c.y, 2*r1, 2*r1, midTheta - .25*PI, midTheta + .25*PI);
-      
-      
-      
-      PVector rUnit = new PVector(c.x - mid.x, c.y - mid.y);
-      
-      println("SCALE: ", rUnit);
-      rUnit.normalize();
-      println("SCALE U: ", rUnit);
-
-      PVector sclRad = rUnit.mult(2*r1);
-
-      PVector c2 = mid.add(sclRad);
-      println("C2: ", c2);
-      fill(#ff0000);
-      stroke(#ff0000);
-
-      //new center
-      fill(0);
-      stroke(0);
-      ellipse(c2.x, c2.y, 10,10);
-      noFill();
-      ellipse(c2.x, c2.y, 2*r1*sclr, 2*r1*sclr);
-      
+        //theta where tangent intersects circle (middle of start theta, end theta)
+        float midTheta = 1.75*PI;
+        //mid point of theta where line will be 
+        PVector mid = getPoint(midTheta, c, r1);
+        //start theta - end theta of real circle
+        float realTheta = .5*PI;
   
-     
+  
+        stroke(0);
+        //circle1
+        arc(c.x,c.y, 2*r1, 2*r1, 0,2*PI);
+        
+        //midpoint
+        fill(#ff0000);
+        ellipse(mid.x, mid.y, 10, 10);
+        //c1
+        fill(0);
+        ellipse(c.x,c.y, 10,10);
+        noFill();
+        println("MID: ", mid);
+        
+        //angle
+        stroke(#ff0000);
+        arc(c.x, c.y, 2*r1, 2*r1, midTheta - (.5*realTheta), midTheta + (.5*realTheta));
+        
+        //unit vector for c1 to mid
+        PVector rUnit = new PVector(c.x - mid.x, c.y - mid.y);
+        rUnit.normalize();
+  
+        PVector sclRad = rUnit.mult(sclr*r1);
+        
+        //new centerpoint
+        PVector c2 = mid.add(sclRad);
+        //new radius
+        float r2 = sclr*2*r1;
+        println("C2: ", c2);
+        fill(#ff0000);
+        stroke(#ff0000);
+  
+        //new center
+        fill(0);
+        stroke(0);
+        ellipse(c2.x, c2.y, 10,10);
+        noFill();
+        ellipse(c2.x, c2.y, r2, r2);
+        
+        
+        //new angle
+        stroke(#ff0000);
+        arc(c2.x, c2.y, r2, r2, midTheta - (1/sclr)*(.5*realTheta), midTheta + (1/sclr)*(.5*realTheta));
+ //     }
    }
    
    public boolean consolidateBars(int iteration) {
@@ -113,7 +127,7 @@ class BarToPie {
      for (CoreData cd : coreData) {
        float realTheta = cd.endTheta - cd.startTheta;
        float midTheta = cd.startTheta + (realTheta / 2);
-       PVector mid = b2p.getPoint(midTheta);
+       PVector mid = b2p.getPoint(midTheta, consts.CENT, consts.RAD);
        
        PVector tangent = new PVector(consts.CENT.y - mid.y, mid.x - consts.CENT.x);
        tangent.normalize();
@@ -141,8 +155,8 @@ class BarToPie {
    public boolean drawSlices(int iteration) {
      float lerpValue = 0;
      for (CoreData cd : coreData) {
-       PVector p1 = b2p.getPoint(cd.startTheta);
-       PVector p2 = b2p.getPoint(cd.endTheta);
+       PVector p1 = b2p.getPoint(cd.startTheta, consts.CENT, consts.RAD);
+       PVector p2 = b2p.getPoint(cd.endTheta, consts.CENT, consts.RAD);
          
        lerpValue = iteration*0.06;
        PVector line1 = PVector.lerp(consts.CENT, p1, lerpValue);
