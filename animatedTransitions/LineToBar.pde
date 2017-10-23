@@ -19,8 +19,11 @@
      plotPoints();
    }
    
-   public void activate() {
-     
+   public void renderBarGraph() {
+     drawAxes();
+     for (int i = 0; i < coreData.size(); i++) {
+       drawRects(i);
+     }
    }
    
    public boolean retractLines(int iteration) {

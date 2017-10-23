@@ -35,32 +35,130 @@ class BarToPie {
    
    public void newCenter() {
       PVector c = new PVector(.5* width, .5* height);
-      float midTheta = PI+1;
-      float r1 = 100;
-      PVector mid = getPoint(midTheta, .5*r1);
+      float midTheta = 1.75*PI;
+      float r1 = 50;
+      PVector mid = getPoint(midTheta, consts.CENT, r1);
       float sclr = 2;
       stroke(0);
-      arc(c.x,c.y, r1, r1, 0,2*PI);
-      fill(0);
+      //circle1
+      arc(c.x,c.y, 2*r1, 2*r1, 0,2*PI);
+      
+      //midpoint
+      fill(#ff0000);
       ellipse(mid.x, mid.y, 10, 10);
+      fill(0);
+      ellipse(c.x,c.y, 10,10);
       noFill();
       println("MID: ", mid);
 
-      stroke(#ff0000);
-      arc(c.x, c.y, r1, r1, PI/2, PI);
+      
+      //angle
+       stroke(#ff0000);
+      arc(c.x, c.y, 2*r1, 2*r1, midTheta - .25*PI, midTheta + .25*PI);
       
       
-      PVector rUnit = new PVector(c.x + mid.x, c.y - mid.y);
+      
+      PVector rUnit = new PVector(c.x - mid.x, c.y - mid.y);
+      
       println("SCALE: ", rUnit);
       rUnit.normalize();
-      PVector sclRad = rUnit.mult(sclr);
+      println("SCALE U: ", rUnit);
+
+      PVector sclRad = rUnit.mult(2*r1);
 
       PVector c2 = mid.add(sclRad);
-      ellipse(c2.x, c2.y, 20,20);
+      println("C2: ", c2);
+      fill(#ff0000);
+      stroke(#ff0000);
+
+      //new center
+      fill(0);
+      stroke(0);
+      ellipse(c2.x, c2.y, 10,10);
+      noFill();
+      ellipse(c2.x, c2.y, 2*r1*sclr, 2*r1*sclr);
       
   
      
    }
+   
+   public boolean consolidateBars(int iteration) {
+     float lerpValue = 1;
+     for (CoreData data : coreData) {
+       PVector topLeft = new PVector(data.barRef.x, data.barRef.y);
+       PVector topRight = new PVector(data.barRef.x + consts.BARWIDTH, data.barRef.y);
+       PVector bottomLeft = new PVector(data.barRef.x, 
+                                        consts.CHARTBOTTOM);
+       PVector bottomRight = new PVector(data.barRef.x + consts.BARWIDTH, 
+                                        consts.CHARTBOTTOM);   
+       PVector midTop = new PVector (data.barRef.x + consts.BARWIDTH/2, data.barRef.y);
+                                        
+       lerpValue = 1- iteration *.02;                               
+       PVector left = PVector.lerp(topLeft, midTop, lerpValue);
+       PVector right = PVector.lerp(topRight, midTop, lerpValue);
+         
+       line(left.x, topLeft.y, left.x, bottomLeft.y);
+       line(right.x, topRight.y, right.x, bottomRight.y);
+     }
+     
+     if (lerpValue <= 0) {
+       return true;
+     }
+     
+     return false;
+   }
+   
+   public boolean moveToTangent(int iteration) {
+     float lerpValue = 0;
+     for (CoreData cd : coreData) {
+       float realTheta = cd.endTheta - cd.startTheta;
+       float midTheta = cd.startTheta + (realTheta / 2);
+       PVector mid = b2p.getPoint(midTheta);
+       
+       PVector tangent = new PVector(consts.CENT.y - mid.y, mid.x - consts.CENT.x);
+       tangent.normalize();
+       tangent.mult(cd.scaledHeight*.5);
+       PVector endPointN = new PVector(mid.x - tangent.x, mid.y - tangent.y);
+       PVector endPointP = new PVector(mid.x + tangent.x, mid.y + tangent.y);  
+         
+       PVector beginTop = new PVector(cd.barRef.x + consts.BARWIDTH/2, cd.scaledLineRef.y);
+       PVector beginBottom = new PVector(cd.barRef.x + consts.BARWIDTH/2, consts.CHARTBOTTOM);
+         
+       lerpValue = iteration*.007;
+       PVector top = PVector.lerp(beginTop, endPointN, lerpValue);        
+       PVector bottom = PVector.lerp(beginBottom, endPointP, lerpValue);
+       
+       line(top.x, top.y, bottom.x, bottom.y);  
+     }
+     
+     if (lerpValue > 1) {
+       return true;
+     }
+     
+     return false;
+   }
+   
+   public boolean drawSlices(int iteration) {
+     float lerpValue = 0;
+     for (CoreData cd : coreData) {
+       PVector p1 = b2p.getPoint(cd.startTheta);
+       PVector p2 = b2p.getPoint(cd.endTheta);
+         
+       lerpValue = iteration*0.06;
+       PVector line1 = PVector.lerp(consts.CENT, p1, lerpValue);
+       PVector line2 = PVector.lerp(consts.CENT, p2, lerpValue);
+         
+       line(consts.CENT.x, consts.CENT.y, line1.x, line1.y);
+       line(consts.CENT.x, consts.CENT.y, line2.x, line2.y);
+     }
+     
+     if (lerpValue > 1) {
+       return true;
+     }
+     
+     return false;
+   }
+    
    
    private void drawWedges() {
      PVector startPoint;
@@ -68,8 +166,8 @@ class BarToPie {
      PVector c = consts.CENT;
      
      for(CoreData cd : coreData) {
-       startPoint = getPoint(cd.startTheta, consts.RAD);
-       endPoint = getPoint(cd.endTheta, consts.RAD);
+       startPoint = getPoint(cd.startTheta, consts.CENT, consts.RAD);
+       endPoint = getPoint(cd.endTheta, consts.CENT, consts.RAD);
        
        //check on simpler dataset that this is working
        line(c.x, c.y, startPoint.x, startPoint.y);
@@ -82,14 +180,14 @@ class BarToPie {
        float realTheta = cd.endTheta - cd.startTheta;
        float midTheta = cd.startTheta + (realTheta / 2);
        
-       PVector midPoint = getPoint(midTheta, consts.RAD);
+       PVector midPoint = getPoint(midTheta, consts.CENT, consts.RAD);
        PVector tanTop = new PVector(midPoint.x, midPoint.y - (.5*cd.scaledHeight));
        PVector tanBottom = new PVector(midPoint.x, midPoint.y + (.5*cd.scaledHeight));
        
        println("top x, y ", tanTop.x, " ", tanTop.y);
        line(tanTop.x, tanTop.y, tanBottom.x, tanBottom.y);
        
-       PVector tanPoint = getPoint(midTheta, consts.RAD);
+       PVector tanPoint = getPoint(midTheta, consts.CENT, consts.RAD);
        
      }
    }
@@ -129,7 +227,7 @@ class BarToPie {
      for(CoreData cd : coreData) {
        float realTheta = cd.endTheta - cd.startTheta;
        float midTheta = cd.startTheta + (realTheta / 2);
-       PVector mid = getPoint(midTheta, consts.RAD);
+       PVector mid = getPoint(midTheta, consts.CENT, consts.RAD);
        
        PVector tangent = new PVector(consts.CENT.y - mid.y, mid.x - consts.CENT.x);
        tangent.normalize();
@@ -146,8 +244,8 @@ class BarToPie {
        
        //get lines from endpoints, lerp towards center. will need to make a new end condition.
        //fill(#938422);
-       PVector realEndPoint1 = getPoint(cd.startTheta, consts.RAD);
-       PVector realEndPoint2 = getPoint(cd.endTheta, consts.RAD);
+       PVector realEndPoint1 = getPoint(cd.startTheta, consts.CENT, consts.RAD);
+       PVector realEndPoint2 = getPoint(cd.endTheta, consts.CENT, consts.RAD);
        
        float rad = consts.RAD;
        PVector cent = consts.CENT;
@@ -247,19 +345,19 @@ class BarToPie {
 
     if (quadrant(theta) == 1) {
       point.x = cx + r * cos(theta);
-      point.y = cy - r * sin(theta);
+      point.y = cy + r * sin(theta);
     } else if(quadrant(theta) == 2) {
-      theta = PI - theta;
+      theta = PI + theta;
       point.x = cx - r * cos(theta);
       point.y = cy - r * sin(theta);
     } else if(quadrant(theta) == 3) {
       theta = theta - PI;
       point.x = cx - r * cos(theta);
-      point.y = cy + r * sin(theta);
+      point.y = cy - r * sin(theta);
     } else {
       theta = 2*PI - theta;
       point.x = cx + r * cos(theta);
-      point.y = cy + r * sin(theta);
+      point.y = cy - r * sin(theta);
     }
     return point;
   }

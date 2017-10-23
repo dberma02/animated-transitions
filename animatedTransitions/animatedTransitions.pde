@@ -7,6 +7,7 @@ ArrayList<CoreData> coreData;
 Constants consts;
 LineToBar l2b;
 BarToPie b2p;
+Button line, bar, pie;
 
 // stages
 static int LINE_GRAPH = 0;
@@ -22,6 +23,10 @@ static int DRAWING_LINES = 9;
 
 static int CONSOLIDATE_BARS = 10;
 static int SCALE_LINES = 11;
+static int MOVE_TO_TANGENT = 12;
+//static int SMOOTH_CIRCLE = 13;
+static int DRAW_SLICES = 13;
+static int PIE_CHART = 14;
 
 
 void setup() {
@@ -46,12 +51,13 @@ void setup() {
   //b2p.drawPositionedLines();
 
 
+
   fill(0);
 
 }
 
 int iteration=0;
-int stage = LINE_GRAPH;
+int stage = BAR_GRAPH;
 //int stage = CONSOLIDATE_BARS;
 boolean transitionToBar = false;
 boolean transitionToLine = false;
@@ -60,6 +66,8 @@ void draw() {
   
   if (stage == LINE_GRAPH) {
     l2b.renderLineGraph();
+  } else if (stage == BAR_GRAPH) {
+    l2b.renderBarGraph();
   }
   
   if (transitionToBar) {
@@ -123,7 +131,12 @@ void draw() {
     //reposition lines to be tangent to "circle"
     //curve arcs to make circle
     //create slice lines
+    goToPie();
   }
+  
+  drawGraphButtons();
+  checkHighlight();
+ 
 }
 
 void goToBar() {
@@ -188,8 +201,64 @@ void goToLine() {
 }
 
 void goToPie() {
-  
+     if (stage == UNFILLING_BARS) {
+        if (unfillBars()) {
+          stage = CONSOLIDATE_BARS;
+          iteration = 51;
+        }
+        iteration--;
+     }
+     if (stage == CONSOLIDATE_BARS) {
+       background(255);
+       l2b.drawBarTops(iteration);
+       boolean completeStage = b2p.consolidateBars(iteration);
+       iteration--;
+       
+       if (completeStage) {
+         stage++;
+         iteration = 0;
+       }
+     }
+     
+     if (stage == SCALE_LINES) {
+       background(255);
+       boolean completeStage = b2p.scaleLines(iteration);
+       iteration ++;
+       
+       if (completeStage) {
+         stage++;
+         iteration = 0;
+       }
+     }
+     
+     if (stage == MOVE_TO_TANGENT) {
+       background(255);
+       boolean completeStage = b2p.moveToTangent(iteration);
+       iteration++;
+       
+       if (completeStage) {
+         stage++;
+         iteration = 0;
+       }
+     }
+     
+     if (stage == DRAW_SLICES) {
+       boolean completeStage = b2p.drawSlices(iteration);
+       iteration++;
+       
+       if (completeStage)
+         stage++;
+     } 
+     
+    //hollow out bars
+    //bring lines together to create single vertical lines
+    //scale lines
+    //reposition lines to be tangent to "circle"
+    //curve arcs to make circle
+    //create slice lines
 }
+
+
 
 boolean unfillBars() {
   if (iteration >= 0) {
@@ -266,4 +335,46 @@ void mouseClicked() {
     stage = UNFILLING_BARS;
   }
   
+}
+
+void drawGraphButtons() {
+  fill(255);
+  
+  float boxX = consts.OFFSET;
+  float boxY =  height - consts.OFFSET*3.5;
+  float boxWidth = width - consts.OFFSET*2;
+  float boxHeight = consts.OFFSET*3;
+  
+  int boxOffset = 20;
+  
+  //button box
+  rect(boxX, boxY, boxWidth, boxHeight);
+  
+  line = new Button(int(boxX + boxOffset + 15), int(boxY + boxOffset), 100, 70, color(240), "Line Graph", 12);
+  line.render();
+  
+  
+
+  
+  
+}
+
+void checkHighlight() {
+  if (stage == BAR_GRAPH) {
+    isBarHighlighted();
+  } else if (stage == LINE_GRAPH) {
+    
+  } else if (stage == PIE_CHART) {
+    
+  } 
+}
+
+void isBarHighlighted() {
+  for (CoreData cd : coreData) {
+    if (mouseX >= cd.barRef.x && mouseX <= (cd.barRef.x + consts.BARWIDTH) && 
+        mouseY >= cd.barRef.y && mouseY <= consts.CHARTBOTTOM) {
+          fill(186, 149, 233);   
+          rect(cd.barRef.x, cd.barRef.y, consts.BARWIDTH, consts.CHARTBOTTOM-cd.barRef.y);
+        }
+  }
 }
