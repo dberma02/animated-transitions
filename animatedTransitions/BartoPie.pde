@@ -110,7 +110,6 @@ class BarToPie {
      return false;
    }
    
-<<<<<<< HEAD
    public boolean scaleLines(int iteration) {
      background(255);
      drawAxes();
@@ -135,14 +134,13 @@ class BarToPie {
      return false;
    }
    
-=======
->>>>>>> 2044ff377dfe6ea5628f8cf629afd890b577221f
+   
    public boolean moveToTangent(int iteration) {
      float lerpValue = 0;
      for (CoreData cd : coreData) {
        float realTheta = cd.endTheta - cd.startTheta;
        float midTheta = cd.startTheta + (realTheta / 2);
-       PVector mid = b2p.getPoint(midTheta);
+       PVector mid = b2p.getPoint(midTheta, consts.CENT, consts.RAD);
        
        PVector tangent = new PVector(consts.CENT.y - mid.y, mid.x - consts.CENT.x);
        tangent.normalize();
@@ -170,8 +168,8 @@ class BarToPie {
    public boolean drawSlices(int iteration) {
      float lerpValue = 0;
      for (CoreData cd : coreData) {
-       PVector p1 = b2p.getPoint(cd.startTheta);
-       PVector p2 = b2p.getPoint(cd.endTheta);
+       PVector p1 = b2p.getPoint(cd.startTheta, consts.CENT, consts.RAD);
+       PVector p2 = b2p.getPoint(cd.endTheta, consts.CENT, consts.RAD);
          
        lerpValue = iteration*0.06;
        PVector line1 = PVector.lerp(consts.CENT, p1, lerpValue);
@@ -220,37 +218,6 @@ class BarToPie {
        
      }
    }
-   
-   public boolean scaleLines(int iteration) {
-     background(255);
-     drawAxes();
-     float lerpValue = 0; 
-     println(iteration);
-     for (CoreData cp: coreData) {       
-       PVector uPoint = new PVector(cp.barRef.x + (consts.BARWIDTH/2), cp.barRef.y);
-       //lerp towards scaled line ref
-       PVector bottom = new PVector(cp.barRef.x + (consts.BARWIDTH/2), height - consts.OFFSET);
-       
-       // should start at 0
-       lerpValue = iteration*.02;
-       PVector lpos = PVector.lerp(uPoint, cp.scaledLineRef, lerpValue);
-     
-
-      
-     //  line(uPoint.x, uPoint.y, bottom.x, bottom.y);
-       line(bottom.x, bottom.y, lpos.x, lpos.y);
-       
-       fill(255);
-    //   ellipse(uPoint.x + consts.BARWIDTH/2, leftP.barRef.y, 0.01*width*lerpValue, 0.01*width*lerpValue);
-     }
-
-     if (lerpValue > 1) {
-       return true;
-     }   
-     
-     return false;
-   }
-    
    
    private void drawTangents() {
      for(CoreData cd : coreData) {
