@@ -24,7 +24,10 @@
      maxValue = Integer.MIN_VALUE;
      totalValue = 0;
      
-     for (int i = 1; i < numLines; i++) {
+     //Why does num lines not work on small dataset??
+     println("numLines: ",numLines);
+//     for (int i = 1; i < numLines; i++) {
+     for (int i = 1; i < 5; i++) {
        String[] data = split(lines[i], ",");
        CoreData cd = new CoreData(data[0], float(data[1]));
        
@@ -57,6 +60,8 @@
        cd.barRef = new PVector(barX, barY); 
        
        float barHeight = height - barY - consts.OFFSET;
+       println("barHeight: ", barHeight);
+       println("height: ", height, "BarY ", barY, "offset: ", consts.OFFSET);
        totalBarHeight += barHeight;
        
        
@@ -67,6 +72,7 @@
        
        i++;
      }
+     println("totalHeight ", totalBarHeight);
       consts.SCALOR = (2*PI*(.5*consts.RAD)) / totalBarHeight;
       
      for (CoreData cd : coreData) {

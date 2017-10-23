@@ -33,16 +33,17 @@ void setup() {
   consts = new Constants();
   
   parser = new Parser(consts);
-  coreData = parser.parse("data.csv");
+  coreData = parser.parse("dataSmall.csv");
   coreData = parser.populateCartesian(coreData);
  
   l2b = new LineToBar(coreData, consts);
   b2p = new BarToPie(coreData, consts);
   
-  //b2p.drawArcs();
-  //b2p.drawWedges();
-  b2p.drawPositionedLines();
+  b2p.drawArcs();
+  b2p.drawWedges();
   b2p.drawTangents();
+ // b2p.drawPositionedLines();
+
 
   fill(0);
 
@@ -100,29 +101,14 @@ void draw() {
        
        if (iteration < 0) {
          stage++;
+         iteration = 100;
        }
      }
      if (stage == SCALE_LINES) {
-       //start points are middle
        
-       for (CoreData cd : coreData) {
-         PVector unscaledTop = new PVector(cd.barRef.x + consts.BARWIDTH/2, cd.barRef.y);
-         //float unscaledHeight = height - cd.barRef.y - consts.OFFSET;
-         //float scaledHeight = unscaledHeight * consts.SCALOR;
-         //PVector bottom = new PVector(unscaledTop.x, unscaledTop.y + unscaledHeight);
-         //PVector scaledTop = new PVector(unscaledTop.x, bottom.y - scaledHeight);
-         
-         float lerpValue = iteration *.02;                               
-         PVector Ltop = PVector.lerp(unscaledTop, cd.scaledLineRef, lerpValue);
-         
-        line(Ltop.x, Ltop.y, cd.scaledLineRef.x, cd.scaledLineRef.y);
-
-         //Points just for reference
-         fill(#166809);
-         ellipse(unscaledTop.x, unscaledTop.y, 10, 10);
-         ellipse(cd.scaledLineRef.x, cd.scaledLineRef.y, 10, 10);
-         
-       }
+       //start points are middle
+       background(255);
+       b2p.scaleLines(iteration);
        iteration --;
        
        if (iteration < 0) {
@@ -216,6 +202,17 @@ boolean unfillBars() {
       l2b.drawVertLines(111);     
     }
   } else {
+    return true;
+  }
+  
+  return false;
+}
+
+boolean scaleLines() {
+  if (iteration >= 0) {
+    background(255);    
+    b2p.scaleLines(iteration);
+  } else {  
     return true;
   }
   

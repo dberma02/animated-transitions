@@ -64,7 +64,85 @@ class BarToPie {
      }
    }
    
+   public boolean scaleLines(int iteration) {
+     background(255);
+     drawAxes();
+     float lerpValue = 0; 
+     println(iteration);
+     for (CoreData cp: coreData) {       
+       PVector uPoint = new PVector(cp.barRef.x + (consts.BARWIDTH/2), cp.barRef.y);
+       //lerp towards scaled line ref
+       PVector bottom = new PVector(cp.barRef.x + (consts.BARWIDTH/2), height - consts.OFFSET);
+       
+       // should start at 0
+       lerpValue = 1-iteration*.02;
+       PVector lpos = PVector.lerp(uPoint, cp.scaledLineRef, lerpValue);
+
+     //  line(uPoint.x, uPoint.y, bottom.x, bottom.y);
+       line(uPoint.x, uPoint.y, lpos.x, lpos.y);
+       
+       fill(255);
+//       ellipse(leftP.barRef.x + consts.BARWIDTH/2, leftP.barRef.y, 0.01*width*lerpValue, 0.01*width*lerpValue);
+     }
+
+     if (lerpValue < 0.0001) {
+       return true;
+     }   
+     
+     return false;
+   }
+    
+   
    private void drawTangents() {
+     for(CoreData cd : coreData) {
+       float realTheta = cd.endTheta - cd.startTheta;
+       float midTheta = cd.startTheta + (realTheta / 2);
+       PVector mid = getPoint(midTheta);
+       
+       PVector tangent = new PVector(consts.CENT.y - mid.y, mid.x - consts.CENT.x);
+       tangent.normalize();
+       tangent.mult(cd.scaledHeight*.5);
+       PVector endPointN = new PVector(mid.x - tangent.x, mid.y - tangent.y);
+       PVector endPointP = new PVector(mid.x + tangent.x, mid.y + tangent.y);
+       
+       
+       line(endPointN.x, endPointN.y, endPointP.x, endPointP.y);
+       
+       //get lines from endpoints, lerp towards center. will need to make a new end condition.
+       //fill(#938422);
+       PVector realEndPoint1 = getPoint(cd.startTheta);
+       PVector realEndPoint2 = getPoint(cd.endTheta);
+       
+       float rad = consts.RAD;
+       PVector cent = consts.CENT;
+       
+       //???
+       
+       //get unit vector describing relationship of midpoint to center of circle
+       //add some multuple of this unit vector to center to get "center point"
+       float sclRad = 100;
+       float startTheta = cd.startTheta / (sclRad*rad);
+       float endTheta = cd.endTheta / (sclRad*rad);
+       PVector r_unit = new PVector(mid.x - consts.CENT.x, mid.y + consts.CENT.y);
+       r_unit.normalize();
+       PVector sclR = r_unit.mult(sclRad);
+ //      ellipse(cent.sub(sclR).x, cent.sub(sclR).y, 20, 20);
+       println(endPointN, endPointP);
+
+    //   arc(cent.sub(sclR).x, cent.sub(sclR).y, rad*sclRad, rad*sclRad, startTheta, endTheta);
+       
+
+       
+       
+       
+       
+       
+       
+     }
+   }
+   
+   //I think this is all wrong
+   private void drawTangentsBad() {
      float bigRad = 1; 
      println("tabgent");
       for(CoreData cd : coreData) {
@@ -75,7 +153,7 @@ class BarToPie {
         float startTheta = cd.startTheta / bigRad;
         float endTheta = cd.endTheta / bigRad;
         float cpScalor = bigRad * consts.RAD;
-        PVector cpScaled = PVector.mult(angleUnit, cpScalor);
+        PVector cpScaled = angleUnit.mult(cpScalor);
         
         println(cpScaled.x,cpScaled.y);
         fill(#157749);
@@ -145,7 +223,6 @@ class BarToPie {
     }
     return point;
   }
+
+}
    
-   
-   
- }
