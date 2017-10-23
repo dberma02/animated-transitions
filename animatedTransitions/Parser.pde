@@ -26,8 +26,8 @@
      
      //Why does num lines not work on small dataset??
      println("numLines: ",numLines);
-//     for (int i = 1; i < numLines; i++) {
-     for (int i = 1; i < 5; i++) {
+     for (int i = 1; i < numLines; i++) {
+     //for (int i = 1; i < 5; i++) {
        String[] data = split(lines[i], ",");
        CoreData cd = new CoreData(data[0], float(data[1]));
        
@@ -73,7 +73,7 @@
        i++;
      }
      println("totalHeight ", totalBarHeight);
-      consts.SCALOR = (2*PI*(.5*consts.RAD)) / totalBarHeight;
+      consts.SCALOR = (2*PI*consts.RAD) / totalBarHeight;
       
      for (CoreData cd : coreData) {
        PVector unscaledTop = new PVector(cd.barRef.x + consts.BARWIDTH/2, cd.barRef.y);
@@ -83,7 +83,7 @@
        cd.scaledLineRef = new PVector(unscaledTop.x, bottom - cd.scaledHeight);
 //       cd.scaledLineRef = new PVector(unscaledTop.x, scaledTop.y)
      }
-      println("SCALOR: ", consts.SCALOR, " CIRC: ", (2*PI*(.5*consts.RAD)));
+      println("SCALOR: ", consts.SCALOR, " CIRC: ", (2*PI*consts.RAD));
       println("totalHeight: ", totalBarHeight);
      
      return coreData;

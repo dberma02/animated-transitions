@@ -33,16 +33,17 @@ void setup() {
   consts = new Constants();
   
   parser = new Parser(consts);
-  coreData = parser.parse("dataSmall.csv");
+  coreData = parser.parse("data.csv");
   coreData = parser.populateCartesian(coreData);
  
   l2b = new LineToBar(coreData, consts);
   b2p = new BarToPie(coreData, consts);
   
-  b2p.drawArcs();
-  b2p.drawWedges();
-  b2p.drawTangents();
- // b2p.drawPositionedLines();
+  b2p.newCenter();
+ // b2p.drawArcs();
+ // b2p.drawWedges();
+  //b2p.drawTangents();
+  //b2p.drawPositionedLines();
 
 
   fill(0);
@@ -56,7 +57,6 @@ boolean transitionToBar = false;
 boolean transitionToLine = false;
 boolean transitionToPie = false;
 void draw() {
-  
   
   if (stage == LINE_GRAPH) {
     l2b.renderLineGraph();
@@ -101,7 +101,7 @@ void draw() {
        
        if (iteration < 0) {
          stage++;
-         iteration = 100;
+         iteration = 0;
        }
      }
      if (stage == SCALE_LINES) {
@@ -109,7 +109,7 @@ void draw() {
        //start points are middle
        background(255);
        b2p.scaleLines(iteration);
-       iteration --;
+       iteration ++;
        
        if (iteration < 0) {
          stage++;
