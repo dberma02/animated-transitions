@@ -1,9 +1,4 @@
-/*
- *
- *
- */
- 
- class BarToPie {
+class BarToPie {
    
    ArrayList<CoreData> coreData;
    Constants consts;
@@ -30,6 +25,7 @@
    private void drawArcs() {
      noFill();
      for(CoreData cd : coreData) {
+       println("startTheta! ",cd.startTheta);
        arc(consts.CENT.x, consts.CENT.y,
        consts.RAD, consts.RAD,
        cd.startTheta, cd.endTheta);
@@ -51,14 +47,60 @@
      }
    }
    
-   private void drawTangents() {
+   private void drawPositionedLines() {
      for(CoreData cd : coreData) {
        float realTheta = cd.endTheta - cd.startTheta;
-       float midTheta = cd.startTheta + (realTheta / 2); 
+       float midTheta = cd.startTheta + (realTheta / 2);
+       
+       PVector midPoint = getPoint(midTheta);
+       PVector tanTop = new PVector(midPoint.x, midPoint.y - (.5*cd.scaledHeight));
+       PVector tanBottom = new PVector(midPoint.x, midPoint.y + (.5*cd.scaledHeight));
+       
+       println("top x, y ", tanTop.x, " ", tanTop.y);
+       line(tanTop.x, tanTop.y, tanBottom.x, tanBottom.y);
+       
        PVector tanPoint = getPoint(midTheta);
        
      }
    }
+   
+   private void drawTangents() {
+     float bigRad = 1; 
+     println("tabgent");
+      for(CoreData cd : coreData) {
+        float realTheta = cd.endTheta - cd.startTheta;
+        float midTheta = cd.startTheta + (realTheta / 2);
+        PVector angleUnit = PVector.fromAngle(midTheta);
+        
+        float startTheta = cd.startTheta / bigRad;
+        float endTheta = cd.endTheta / bigRad;
+        float cpScalor = bigRad * consts.RAD;
+        PVector cpScaled = PVector.mult(angleUnit, cpScalor);
+        
+        println(cpScaled.x,cpScaled.y);
+        fill(#157749);
+        arc(cpScaled.x,cpScaled.y, bigRad, bigRad, startTheta, endTheta, PIE);
+        
+        
+        
+        
+        
+       //float realTheta = cd.endTheta - cd.startTheta;
+       //float midTheta = cd.startTheta + (realTheta / 2);
+       
+       //PVector midPoint = getPoint(midTheta);
+       //PVector tanTop = new PVector(midPoint.x, midPoint.y - (.5*cd.scaledHeight));
+       //PVector tanBottom = new PVector(midPoint.x, midPoint.y + (.5*cd.scaledHeight));
+       
+       //println("top x, y ", tanTop.x, " ", tanTop.y);
+       //line(tanTop.x, tanTop.y, tanBottom.x, tanBottom.y);
+       
+       //PVector tanPoint = getPoint(midTheta);
+       
+     }
+     
+   }
+   
    
    private void retractLines() {
      

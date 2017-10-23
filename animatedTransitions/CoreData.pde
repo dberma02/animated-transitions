@@ -5,7 +5,8 @@ class CoreData {
   float yValueRaw;
   float startTheta;
   float endTheta;
-  int scaledHeight;
+  float scaledHeight;
+  PVector scaledLineRef;
   PVector barRef;
   
   CoreData(String xValueRaw, float yValueRaw) {
