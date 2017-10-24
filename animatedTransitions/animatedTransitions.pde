@@ -15,7 +15,9 @@ static int RETRACTING_LINES = 1;
 static int DRAWING_TOPS = 2;
 static int DRAWING_VERT_LINES = 3;
 static int FILLING_BARS = 4;
+
 static int BAR_GRAPH = 5;
+
 static int UNFILLING_BARS = 6;
 static int RETRACTING_VERT_LINES = 7;
 static int RETRACTING_TOPS = 8;
@@ -24,9 +26,17 @@ static int DRAWING_LINES = 9;
 static int CONSOLIDATE_BARS = 10;
 static int SCALE_LINES = 11;
 static int MOVE_TO_TANGENT = 12;
-//static int SMOOTH_CIRCLE = 13;
-static int DRAW_SLICES = 13;
-static int PIE_CHART = 14;
+static int SMOOTH_CIRCLE = 13;
+static int DRAW_SLICES = 14;
+
+static int PIE_CHART = 15;
+
+static int REMOVE_SLICES = 16;
+static int BACK_TO_LINES = 17;
+static int TO_AXES = 18;
+static int RESIZE = 19;
+static int EXPAND_BARS = 20;
+
 
 
 void setup() {
@@ -44,24 +54,19 @@ void setup() {
   l2b = new LineToBar(coreData, consts);
   b2p = new BarToPie(coreData, consts);
   
-  b2p.newCenter();
- // b2p.drawArcs();
- // b2p.drawWedges();
-  //b2p.drawTangents();
-  //b2p.drawPositionedLines();
-
-
   fill(0);
 
 }
 
 int iteration=0;
-int stage = BAR_GRAPH;
+int stage = LINE_GRAPH;
 //int stage = CONSOLIDATE_BARS;
-boolean transitionToBar = false;
+boolean transitionLineToBar = false;
 boolean transitionToLine = false;
 boolean transitionToPie = false;
+boolean transitionPieToBar = false;
 void draw() {
+  
   
   if (stage == LINE_GRAPH) {
     background(255);    
@@ -71,8 +76,8 @@ void draw() {
     l2b.renderBarGraph();
   }
   
-  if (transitionToBar) {
-    goToBar();
+  if (transitionLineToBar) {
+    goLineToBar();
   }
   
   if (transitionToLine) {
@@ -80,59 +85,11 @@ void draw() {
   }
   
   if (transitionToPie) {
-     if (stage == UNFILLING_BARS) {
-        if (unfillBars()) {
-          stage = CONSOLIDATE_BARS;
-          iteration = 51;
-        }
-        iteration--;
-     }
-     if (stage == CONSOLIDATE_BARS) {
-       background(255);
-       l2b.drawBarTops(iteration);
-       for (CoreData data : coreData) {
-         PVector topLeft = new PVector(data.barRef.x, data.barRef.y);
-         PVector topRight = new PVector(data.barRef.x + consts.BARWIDTH, data.barRef.y);
-         PVector bottomLeft = new PVector(data.barRef.x, 
-                                        consts.CHARTBOTTOM);
-         PVector bottomRight = new PVector(data.barRef.x + consts.BARWIDTH, 
-                                        consts.CHARTBOTTOM);   
-         PVector midTop = new PVector (data.barRef.x + consts.BARWIDTH/2, data.barRef.y);
-                                        
-         float lerpValue = 1- iteration *.02;                               
-         PVector left = PVector.lerp(topLeft, midTop, lerpValue);
-         PVector right = PVector.lerp(topRight, midTop, lerpValue);
-         
-         line(left.x, topLeft.y, left.x, bottomLeft.y);
-         line(right.x, topRight.y, right.x, bottomRight.y);
-       }
-       iteration--;
-       
-       if (iteration < 0) {
-         stage++;
-         iteration = 0;
-       }
-     }
-     if (stage == SCALE_LINES) {
-       
-       //start points are middle
-       background(255);
-       b2p.scaleLines(iteration);
-       iteration ++;
-       
-       if (iteration < 0) {
-         stage++;
-         iteration = 100;
-       }
-     }
-     
-    //hollow out bars
-    //bring lines together to create single vertical lines
-    //scale lines
-    //reposition lines to be tangent to "circle"
-    //curve arcs to make circle
-    //create slice lines
     goToPie();
+  }
+  
+  if (transitionPieToBar) {
+    goPieToBar();
   }
   
   drawGraphButtons();
@@ -140,7 +97,7 @@ void draw() {
  
 }
 
-void goToBar() {
+void goLineToBar() {
   
   boolean stageComplete = false;
   if (stage == RETRACTING_LINES) {
@@ -157,7 +114,7 @@ void goToBar() {
   if (stageComplete) {
     stage++;
     if (stage == BAR_GRAPH) {
-      transitionToBar = false;
+      transitionLineToBar = false;
       iteration = coreData.size()-1;
     } else {
       iteration = 0;
@@ -245,23 +202,134 @@ void goToPie() {
        }
      }
      
+     if (stage == SMOOTH_CIRCLE) {
+       background(255);
+       boolean completeStage = b2p.smoothCircle(iteration);
+       iteration ++;
+       
+       if (completeStage) {
+         stage++;
+         iteration = 0;
+       }
+     }
+     
      if (stage == DRAW_SLICES) {
        boolean completeStage = b2p.drawSlices(iteration);
        iteration++;
        
-       if (completeStage)
+       if (completeStage) {
          stage++;
-     } 
-     
-    //hollow out bars
-    //bring lines together to create single vertical lines
-    //scale lines
-    //reposition lines to be tangent to "circle"
-    //curve arcs to make circle
-    //create slice lines
+       }
+     }
 }
 
+//static int REMOVE_SLICES = 16;
+//static int BACK_TO_LINES = 17;
+//static int TO_AXES = 18;
+//static int EXPAND_BARS = 19;
+void goPieToBar() {
+  if (stage == REMOVE_SLICES) {
+    if (removeTheSlices()) {
+      stage++;
+      iteration = 100;
+    } else {
+      iteration--;
+    }
+  } else if (stage == BACK_TO_LINES) {
+    if (backToLines()) {
+      stage++;
+      iteration = 111;
+    } else {
+      iteration--;
+    }
+  } else if (stage == TO_AXES) {
+    if (backToAxes()) {
+      stage++;
+      iteration = 125;
+    } else {
+      iteration--;
+    }
+  } else if (stage == RESIZE) {
+    if (resizeLines()) {
+      stage++;
+      iteration = 0;
+    } else {
+      iteration--;
+    }
+  } else if (stage == EXPAND_BARS) {
+    if (expandBars()) {
+      stage = FILLING_BARS;
+      iteration = 0;
+    } else {
+      iteration++;
+    }
+  } else if (stage == FILLING_BARS) {
+     if (l2b.drawRects(iteration)) {
+       stage = BAR_GRAPH;
+       transitionPieToBar = false;
+     } else {
+       iteration++;
+     }
+  }
+}
 
+boolean removeTheSlices() {
+  if (iteration >= 0) {
+    background(255);
+    b2p.smoothCircle(100);
+    b2p.drawSlices(iteration);
+  } else {
+    return true;
+  }
+  
+  return false;
+}
+
+boolean backToLines() {
+  if (iteration >= 0) {
+    background(255);
+    b2p.smoothCircle(iteration);
+  } else {
+    return true;
+  }
+  
+  return false;
+}
+
+boolean backToAxes() {
+  if (iteration >= 0) {
+    background(255);
+    b2p.drawAxes();
+    b2p.moveToTangent(iteration);
+  } else {
+    return true;
+  }
+  
+  return false;
+}
+
+boolean resizeLines() {
+  if (iteration >= 0) {
+    background(255);
+    b2p.drawAxes();
+    b2p.scaleLines(iteration);
+  } else {
+    return true;
+  }
+  return false;
+}
+
+boolean expandBars() {
+  if (iteration <= 50) {
+    background(255);
+    l2b.drawBarTops(iteration);
+    b2p.consolidateBars(iteration);
+  } else {
+    return true;
+  }
+  
+  return false;
+}
 
 boolean unfillBars() {
   if (iteration >= 0) {
@@ -327,9 +395,16 @@ boolean redrawLineGraph() {
 }
 
 void mouseClicked() {
-  if (bar.isClicked() && stage == LINE_GRAPH) {
-    transitionToBar = true;
-    stage = RETRACTING_LINES;
+  if (bar.isClicked()) {
+    if (stage == LINE_GRAPH) {
+      transitionLineToBar = true;
+      stage = RETRACTING_LINES;
+    } else if (stage == PIE_CHART) {
+      iteration = 20;
+      transitionPieToBar = true;
+      stage = REMOVE_SLICES;
+    }
+    
   }
   
   if (pie.isClicked() && stage == BAR_GRAPH) {
@@ -408,8 +483,35 @@ void highlightPoints() {
 
 void highlightSlices() {
   for (CoreData cd : coreData) {
+    float mouseTheta = this.cleanMouseAngle(cd);
+    if (mouseTheta > cd.startTheta && mouseTheta < cd.endTheta) {
+      if ((dist(mouseX, mouseY, consts.CENT.x, consts.CENT.y)) < consts.RAD) {
+        //highlight
+        println(cd.barRef.x);
+        
+      }
+    }
     
     
   }
   
+}
+  
+float cleanMouseAngle(CoreData cd) {
+    float mouseTheta = atan((mouseX - (cd.barRef.x + consts.BARWIDTH/2)) / 
+                            (mouseY - (cd.barRef.y)));
+    if (mouseX > cd.barRef.x + consts.BARWIDTH/2) {
+      if (mouseY > cd.barRef.y) {
+        mouseTheta = HALF_PI + (-1 * mouseTheta);
+      } else {
+        mouseTheta = PI + (HALF_PI - mouseTheta);
+      }
+    } else {
+      if (mouseY > cd.barRef.y) {
+        mouseTheta = HALF_PI - mouseTheta;
+      } else {
+        mouseTheta = PI + HALF_PI + (-1 * mouseTheta);
+      }
+    }
+    return mouseTheta;
 }
