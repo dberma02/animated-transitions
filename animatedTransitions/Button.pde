@@ -61,7 +61,7 @@ public class Button {
   
   public boolean isClicked() {
     if (mouseX >= xPos && mouseX <= (xPos + bWidth) &&
-      mouseY >= yPos && mouseY <= (yPos + bHeight)) {
+        mouseY >= yPos && mouseY <= (yPos + bHeight)) {
         return true;
     }
     return false;
