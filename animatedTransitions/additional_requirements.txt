@@ -1,0 +1,2 @@
+For the additional requirement, we created a transitions that had many stages
+beween them.

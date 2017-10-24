@@ -24,9 +24,10 @@ static int DRAWING_LINES = 9;
 static int CONSOLIDATE_BARS = 10;
 static int SCALE_LINES = 11;
 static int MOVE_TO_TANGENT = 12;
-//static int SMOOTH_CIRCLE = 13;
-static int DRAW_SLICES = 13;
-static int PIE_CHART = 14;
+static int SMOOTH_CIRCLE = 13;
+static int DRAW_SLICES = 14;
+static int PIE_CHART = 15;
+
 
 
 void setup() {
@@ -44,10 +45,10 @@ void setup() {
   l2b = new LineToBar(coreData, consts);
   b2p = new BarToPie(coreData, consts);
   
-  b2p.drawTangents();
- //  b2p.drawArcs();
- // b2p.newCenter();
-  b2p.drawWedges();
+ // b2p.drawTangents();
+  // b2p.drawArcs();
+  //b2p.newCenter();
+  //b2p.drawWedges();
 
 
 
@@ -187,6 +188,17 @@ void goToPie() {
        background(255);
        boolean completeStage = b2p.moveToTangent(iteration);
        iteration++;
+       
+       if (completeStage) {
+         stage++;
+         iteration = 0;
+       }
+     }
+     
+     if (stage == SMOOTH_CIRCLE) {
+       background(255);
+       boolean completeStage = b2p.smoothCircle(iteration);
+       iteration ++;
        
        if (completeStage) {
          stage++;
@@ -356,9 +368,57 @@ void highlightPoints() {
 
 
 void highlightSlices() {
+  background(255);
+  drawGraphButtons();
   for (CoreData cd : coreData) {
+    if (highlightSlice(cd.startTheta, cd.endTheta) ){
+      fill(0);
+      text("(" + cd.xValueRaw + ", " + cd.yValueRaw + ")",
+            consts.CENT.x, (consts.CENT.y - consts.RAD - 10));
+      fill(color(0, 200, 255));
+    } else {    
+      fill(color(0, 150, 200));
+    }
+    arc(consts.CENT.x, consts.CENT.y,
+      consts.RAD *2,
+      consts.RAD *2,
+      cd.startTheta,
+      cd.endTheta, PIE);
+  }
+}
+
+boolean highlightSlice(float start, float end) {
+    float angle;
+    
+    float opposite = abs(mouseY - (height / 2));
+    float hypotenuse = dist(mouseX, mouseY, width / 2, height / 2);
+    angle = asin(opposite / hypotenuse);
+    
+    //if quad 1, angle doesnt need to change
+    if(quadrant() == 2) {
+       angle = PI - angle;
+    } else if(quadrant() == 3) {
+       angle = PI + angle;
+    } else if(quadrant() == 4) {
+       angle = 2*PI - angle;
+    }
     
     
+    return hypotenuse <= consts.RAD &&
+           start < angle &&
+           angle < end;
   }
   
-}
+  int quadrant() {
+    float centerX =  consts.CENT.x;
+    float centerY = consts.CENT.y;
+    if(mouseX > centerX && mouseY < centerY) {
+       return 4; 
+    } else if(mouseX < centerX && mouseY < centerY) {
+      return 3;
+    } else if(mouseX < centerX && mouseY > centerY) {
+      return 2;
+    } else {
+      return 1;
+    }
+  }

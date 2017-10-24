@@ -33,66 +33,78 @@ class BarToPie {
    }
    
    
-   public void newCenter() {
+   public boolean smoothCircle(int iteration) {
+     fill(255);
+      float lerpValue = 0; 
       //center of actual circle
       PVector c = consts.CENT;
       //radius of actual circle
       float r1 = consts.RAD;
       //value for which circle will be scaled up by to get big outer circle
-      float sclr = 100;
+      float sclr = 3;
       
       for(CoreData cd : coreData) {
         //start theta - end theta of real circle
-        float realTheta = (.5*(cd.endTheta - cd.startTheta));
+        float realTheta = cd.endTheta - cd.startTheta;
         //theta where tangent intersects circle (middle of start theta, end theta)
-        float midTheta = cd.startTheta + realTheta;
+        float midTheta = cd.startTheta + (.5*realTheta);
         //mid point of theta where line will be 
         PVector mid = getPoint(midTheta, c, r1);
         
-  
-  
-        //stroke(0);
-        ////circle1
-        arc(c.x,c.y, 2*r1, 2*r1, 0,2*PI);
-        
-        ////midpoint
+        //midpoint
         //fill(#ff0000);
-        //ellipse(mid.x, mid.y, 10, 10);
-        ////c1
-        //fill(0);
         //ellipse(c.x,c.y, 10,10);
+        //ellipse(mid.x, mid.y, 10, 10);
         //noFill();
-        //println("MID: ", mid);
-        
-        ////angle
-        stroke(#ff0000);
-        arc(c.x, c.y, 2*r1, 2*r1, midTheta - (.5*realTheta), midTheta + (.5*realTheta));
+       
         
         //unit vector for c1 to mid
         PVector rUnit = new PVector(c.x - mid.x, c.y - mid.y);
         rUnit.normalize();
         //scaled vector
-        PVector sclRad = rUnit.mult(sclr*r1);
+        PVector sclRad = PVector.mult(rUnit, sclr*r1);
         
         //new centerpoint
-        PVector c2 = mid.add(sclRad);
+        PVector c2 = PVector.add(sclRad, mid);
         //new radius
         float r2 = sclr*2*r1;
-        //fill(#ff0000);
-        //stroke(#ff0000);
-  
-        ////new center
-        //fill(0);
-        //stroke(0);
-        //ellipse(c2.x, c2.y, 10,10);
-        //noFill();
-        //ellipse(c2.x, c2.y, r2, r2);
         
+        
+        
+        //lerp location of far rad toward small rad
+        lerpValue = iteration*.02;
+        PVector lpos = PVector.lerp(c2, c, lerpValue);
+        //Make new rad from lpos
+        
+        //float lrad = PVector.dist(lpos, mid);
+        float lrad = new PVector(lpos.x - mid.x, lpos.y - mid.y).mag()*2;
+        
+        float sclr2 = lrad / r1;
+       
+
+        float startTheta2 = midTheta - (1/sclr2)*(realTheta);
+        float endTheta2 = midTheta + (1/sclr2)*(realTheta);
+  
+        //line(lpos.x,lpos.y, mid.x,mid.y);
+        //new center
+ //       fill(0);
+ //       stroke(0);
+ //       ellipse(lpos.x, lpos.y, 10,10);
+ //       noFill();
+ ////       ellipse(lpos.x, lpos.y, lrad, lrad);
         
         ////new angle
-        stroke(#ff0000);
-        arc(c2.x, c2.y, r2, r2, midTheta - (1/sclr)*(.5*realTheta), midTheta + (1/sclr)*(.5*realTheta));
+        stroke(0);
+
+        //arc(c2.x, c2.y, r2, r2, midTheta - (1/sclr)*(.5*realTheta), midTheta + (1/sclr)*(.5*realTheta));
+    //    arc(c2.x, c2.y, r2, r2, startTheta2, endTheta2);
+        arc(lpos.x, lpos.y, lrad, lrad, startTheta2, endTheta2);
       }
+      
+     if (lerpValue >= 1) {
+       return true;
+     }   
+     return false;
    }
    
    public boolean consolidateBars(int iteration) {
@@ -358,5 +370,6 @@ class BarToPie {
     return point;
   }
 
+//Waiting to get rid of this for debugging!
+
 }
-   
