@@ -65,6 +65,7 @@ boolean transitionLineToBar = false;
 boolean transitionToLine = false;
 boolean transitionToPie = false;
 boolean transitionPieToBar = false;
+boolean transitionLineToPie = false;
 void draw() {
   
   
@@ -90,6 +91,11 @@ void draw() {
   
   if (transitionPieToBar) {
     goPieToBar();
+  }
+  
+  if (transitionLineToPie) {
+    goLineToBar();
+    goToPie();
   }
   
   drawGraphButtons();
@@ -407,10 +413,15 @@ void mouseClicked() {
     
   }
   
-  if (pie.isClicked() && stage == BAR_GRAPH) {
-    iteration = coreData.size()-1;
-    transitionToPie = true;
-    stage = UNFILLING_BARS;
+  if (pie.isClicked()) {
+    if (stage == BAR_GRAPH) {
+      iteration = coreData.size()-1;
+      transitionToPie = true;
+      stage = UNFILLING_BARS;
+    } else if (stage == LINE_GRAPH) {
+      transitionLineToPie = true;
+      stage = RETRACTING_LINES;
+    }
   }
   
   if (line.isClicked() && stage == BAR_GRAPH) {
@@ -478,40 +489,4 @@ void highlightPoints() {
       text("(" + cd.xValueRaw + ", " + cd.yValueRaw + ")", mouseX, mouseY-10);        
     }
   } 
-}
-
-
-void highlightSlices() {
-  for (CoreData cd : coreData) {
-    float mouseTheta = this.cleanMouseAngle(cd);
-    if (mouseTheta > cd.startTheta && mouseTheta < cd.endTheta) {
-      if ((dist(mouseX, mouseY, consts.CENT.x, consts.CENT.y)) < consts.RAD) {
-        //highlight
-        println(cd.barRef.x);
-        
-      }
-    }
-    
-    
-  }
-  
-}
-  
-float cleanMouseAngle(CoreData cd) {
-    float mouseTheta = atan((mouseX - (cd.barRef.x + consts.BARWIDTH/2)) / 
-                            (mouseY - (cd.barRef.y)));
-    if (mouseX > cd.barRef.x + consts.BARWIDTH/2) {
-      if (mouseY > cd.barRef.y) {
-        mouseTheta = HALF_PI + (-1 * mouseTheta);
-      } else {
-        mouseTheta = PI + (HALF_PI - mouseTheta);
-      }
-    } else {
-      if (mouseY > cd.barRef.y) {
-        mouseTheta = HALF_PI - mouseTheta;
-      } else {
-        mouseTheta = PI + HALF_PI + (-1 * mouseTheta);
-      }
-    }
-    return mouseTheta;
 }
