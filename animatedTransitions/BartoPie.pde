@@ -242,7 +242,6 @@ class BarToPie {
      }
    }
    
-       
    private void drawTangents() {
      for(CoreData cd : coreData) {
        float realTheta = cd.endTheta - cd.startTheta;
