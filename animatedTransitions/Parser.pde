@@ -50,7 +50,7 @@
      
      float startTheta = 0;
      
-     println(totalValue);
+     println("TotalValue: ",totalValue);
      int totalBarHeight = 0;
      int i = 0;
      for (CoreData cd : coreData) {
@@ -58,9 +58,9 @@
        float barY = consts.CHARTBOTTOM - (cd.yValueRaw * (consts.CHARTHEIGHT)/maxValue);
        cd.barRef = new PVector(barX, barY); 
        
-       float barHeight = height - barY - consts.OFFSET;
+       float barHeight = height - barY - (height - consts.CHARTBOTTOM);
        println("barHeight: ", barHeight);
-       println("height: ", height, "BarY ", barY, "offset: ", consts.OFFSET);
+       println("height: ", height, "BarY ", barY, "BOTTOM: ", consts.CHARTBOTTOM);
        totalBarHeight += barHeight;
        
        
@@ -76,10 +76,10 @@
       
      for (CoreData cd : coreData) {
        PVector unscaledTop = new PVector(cd.barRef.x + consts.BARWIDTH/2, cd.barRef.y);
-       float unscaledHeight = consts.CHARTBOTTOM - cd.barRef.y;
+       float unscaledHeight = height - (height - consts.CHARTBOTTOM) - cd.barRef.y;
+       println("unscaled height: ", unscaledHeight);
        cd.scaledHeight = unscaledHeight * consts.SCALOR;
-       float bottom = unscaledTop.y + unscaledHeight;
-       cd.scaledLineRef = new PVector(unscaledTop.x, bottom - cd.scaledHeight);
+       cd.scaledLineRef = new PVector(unscaledTop.x, consts.CHARTBOTTOM - cd.scaledHeight);
 //       cd.scaledLineRef = new PVector(unscaledTop.x, scaledTop.y)
      }
       println("SCALOR: ", consts.SCALOR, " CIRC: ", (2*PI*consts.RAD));

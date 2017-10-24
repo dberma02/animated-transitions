@@ -35,69 +35,69 @@ class BarToPie {
    
    public void newCenter() {
       //center of actual circle
-      PVector c = new PVector(.5* width, .5* height);
+      PVector c = consts.CENT;
       //radius of actual circle
-      float r1 = 50;
+      float r1 = consts.RAD;
       //value for which circle will be scaled up by to get big outer circle
       float sclr = 100;
       
-   //   for(CoreData cd in coreData) {
-      
+      for(CoreData cd : coreData) {
+        //start theta - end theta of real circle
+        float realTheta = (.5*(cd.endTheta - cd.startTheta));
         //theta where tangent intersects circle (middle of start theta, end theta)
-        float midTheta = 1.75*PI;
+        float midTheta = cd.startTheta + realTheta;
         //mid point of theta where line will be 
         PVector mid = getPoint(midTheta, c, r1);
-        //start theta - end theta of real circle
-        float realTheta = .5*PI;
+        
   
   
-        stroke(0);
-        //circle1
+        //stroke(0);
+        ////circle1
         arc(c.x,c.y, 2*r1, 2*r1, 0,2*PI);
         
-        //midpoint
-        fill(#ff0000);
-        ellipse(mid.x, mid.y, 10, 10);
-        //c1
-        fill(0);
-        ellipse(c.x,c.y, 10,10);
-        noFill();
-        println("MID: ", mid);
+        ////midpoint
+        //fill(#ff0000);
+        //ellipse(mid.x, mid.y, 10, 10);
+        ////c1
+        //fill(0);
+        //ellipse(c.x,c.y, 10,10);
+        //noFill();
+        //println("MID: ", mid);
         
-        //angle
+        ////angle
         stroke(#ff0000);
         arc(c.x, c.y, 2*r1, 2*r1, midTheta - (.5*realTheta), midTheta + (.5*realTheta));
         
         //unit vector for c1 to mid
         PVector rUnit = new PVector(c.x - mid.x, c.y - mid.y);
         rUnit.normalize();
-  
+        //scaled vector
         PVector sclRad = rUnit.mult(sclr*r1);
         
         //new centerpoint
         PVector c2 = mid.add(sclRad);
         //new radius
         float r2 = sclr*2*r1;
-        println("C2: ", c2);
-        fill(#ff0000);
-        stroke(#ff0000);
+        //fill(#ff0000);
+        //stroke(#ff0000);
   
-        //new center
-        fill(0);
-        stroke(0);
-        ellipse(c2.x, c2.y, 10,10);
-        noFill();
-        ellipse(c2.x, c2.y, r2, r2);
+        ////new center
+        //fill(0);
+        //stroke(0);
+        //ellipse(c2.x, c2.y, 10,10);
+        //noFill();
+        //ellipse(c2.x, c2.y, r2, r2);
         
         
-        //new angle
+        ////new angle
         stroke(#ff0000);
         arc(c2.x, c2.y, r2, r2, midTheta - (1/sclr)*(.5*realTheta), midTheta + (1/sclr)*(.5*realTheta));
- //     }
+      }
    }
    
    public boolean consolidateBars(int iteration) {
      float lerpValue = 1;
+
      for (CoreData data : coreData) {
        PVector topLeft = new PVector(data.barRef.x, data.barRef.y);
        PVector topRight = new PVector(data.barRef.x + consts.BARWIDTH, data.barRef.y);
@@ -107,21 +107,45 @@ class BarToPie {
                                         consts.CHARTBOTTOM);   
        PVector midTop = new PVector (data.barRef.x + consts.BARWIDTH/2, data.barRef.y);
                                         
-       lerpValue = 1- iteration *.02;                               
+       lerpValue = 1 - iteration *.02;                               
        PVector left = PVector.lerp(topLeft, midTop, lerpValue);
        PVector right = PVector.lerp(topRight, midTop, lerpValue);
          
        line(left.x, topLeft.y, left.x, bottomLeft.y);
        line(right.x, topRight.y, right.x, bottomRight.y);
      }
-     
-     if (lerpValue <= 0) {
+     if (lerpValue > 1) {
        return true;
      }
      
      return false;
    }
    
+   public boolean scaleLines(int iteration) {
+     background(255);
+     drawAxes();
+     float lerpValue = 0; 
+     for (CoreData cp: coreData) {       
+       PVector uPoint = new PVector(cp.barRef.x + (consts.BARWIDTH/2), cp.barRef.y);
+       //lerp towards scaled line ref
+       PVector bottom = new PVector(cp.barRef.x + (consts.BARWIDTH/2), consts.CHARTBOTTOM);
+       
+       lerpValue = iteration*.008;
+       PVector lpos = PVector.lerp(uPoint, cp.scaledLineRef, lerpValue);
+
+       line(bottom.x, bottom.y, lpos.x, lpos.y);
+       
+       fill(255);
+     }
+
+     if (lerpValue > 1) {
+       return true;
+     }   
+     
+     return false;
+   }
+   
+
    public boolean moveToTangent(int iteration) {
      float lerpValue = 0;
      for (CoreData cd : coreData) {
@@ -138,7 +162,7 @@ class BarToPie {
        PVector beginTop = new PVector(cd.barRef.x + consts.BARWIDTH/2, cd.scaledLineRef.y);
        PVector beginBottom = new PVector(cd.barRef.x + consts.BARWIDTH/2, consts.CHARTBOTTOM);
          
-       lerpValue = iteration*.007;
+       lerpValue = iteration*.009;
        PVector top = PVector.lerp(beginTop, endPointN, lerpValue);        
        PVector bottom = PVector.lerp(beginBottom, endPointP, lerpValue);
        
@@ -198,7 +222,7 @@ class BarToPie {
        PVector tanTop = new PVector(midPoint.x, midPoint.y - (.5*cd.scaledHeight));
        PVector tanBottom = new PVector(midPoint.x, midPoint.y + (.5*cd.scaledHeight));
        
-       println("top x, y ", tanTop.x, " ", tanTop.y);
+       //println("top x, y ", tanTop.x, " ", tanTop.y);
        line(tanTop.x, tanTop.y, tanBottom.x, tanBottom.y);
        
        PVector tanPoint = getPoint(midTheta, consts.CENT, consts.RAD);
@@ -206,37 +230,7 @@ class BarToPie {
      }
    }
    
-   public boolean scaleLines(int iteration) {
-     background(255);
-     drawAxes();
-     float lerpValue = 0; 
-     println(iteration);
-     for (CoreData cp: coreData) {       
-       PVector uPoint = new PVector(cp.barRef.x + (consts.BARWIDTH/2), cp.barRef.y);
-       //lerp towards scaled line ref
-       PVector bottom = new PVector(cp.barRef.x + (consts.BARWIDTH/2), height - consts.OFFSET);
        
-       // should start at 0
-       lerpValue = iteration*.02;
-       PVector lpos = PVector.lerp(uPoint, cp.scaledLineRef, lerpValue);
-     
-
-      
-     //  line(uPoint.x, uPoint.y, bottom.x, bottom.y);
-       line(bottom.x, bottom.y, lpos.x, lpos.y);
-       
-       fill(255);
-    //   ellipse(uPoint.x + consts.BARWIDTH/2, leftP.barRef.y, 0.01*width*lerpValue, 0.01*width*lerpValue);
-     }
-
-     if (lerpValue > 1) {
-       return true;
-     }   
-     
-     return false;
-   }
-    
-   
    private void drawTangents() {
      for(CoreData cd : coreData) {
        float realTheta = cd.endTheta - cd.startTheta;
@@ -278,13 +272,6 @@ class BarToPie {
        println(endPointN, endPointP);
 
     //   arc(cent.sub(sclR).x, cent.sub(sclR).y, rad*sclRad, rad*sclRad, startTheta, endTheta);
-       
-
-       
-       
-       
-       
-       
        
      }
    }
@@ -334,18 +321,13 @@ class BarToPie {
    }
    
    private int quadrant(float theta) {
-    println("Quadrant theta: ", theta);
     if(theta < PI/2) {
-      println("Quadrant 1");
        return 1; 
     } else if(theta < PI) {
-      println("Quadrant 2");
       return 2;
     } else if(theta < 1.5*PI) {
-      println("Quadrant 3");
       return 3;
     } else {
-      println("Quadrant 4");
       return 4;
     }
   }
