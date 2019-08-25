@@ -1,5 +1,5 @@
 # Animated Transitions
-Animated transitions between data visualizations in processing.js. 
+Animated transitions between data visualizations in Processing3
 Specific transitions include: 
 - line graph to bar graph
 - bar graph to line chart
@@ -8,4 +8,4 @@ Specific transitions include:
 
 Designed transitions in order to preserve the significant aspects of each data visualization throughout the animation.
 
-To run, (install if necessary) and open processing.js and run the file 'animatedTransitions.pde'
+To run, open processing3 and run the file 'animatedTransitions.pde'
